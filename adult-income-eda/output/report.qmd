@@ -20,7 +20,7 @@ execute:
 #| include: false
 library(tidyverse)
 library(arrow)
-source("../R/style_tokens.R")
+source("styles/style_tokens.R")
 ```
 
 # Introduction
@@ -65,7 +65,7 @@ The unweighted analyses throughout this report are based on a sample that underr
 
 ```{r}
 #| label: load-data
-df <- read_parquet("../data/processed/adult_clean.parquet")
+df <- read_parquet("data/processed/adult_clean.parquet")
 ```
 
 **Column dictionary** (15 columns, no header row in the source file — names applied from `adult.names`):
@@ -94,7 +94,7 @@ df <- read_parquet("../data/processed/adult_clean.parquet")
 
 ```{r}
 #| label: record-count
-tbl_rc <- readRDS("../data/processed/tbl_record_count.rds")
+tbl_rc <- readRDS("data/processed/tbl_record_count.rds")
 knitr::kable(tbl_rc)
 ```
 
@@ -106,7 +106,7 @@ The raw file encodes all missing values as the string `"?"` rather than true `NA
 
 ```{r}
 #| label: missing-values
-tbl_miss <- readRDS("../data/processed/tbl_missing.rds")
+tbl_miss <- readRDS("data/processed/tbl_missing.rds")
 knitr::kable(tbl_miss)
 ```
 
@@ -118,7 +118,7 @@ knitr::kable(tbl_miss)
 
 ```{r}
 #| label: numeric-ranges
-tbl_ranges <- readRDS("../data/processed/tbl_ranges.rds")
+tbl_ranges <- readRDS("data/processed/tbl_ranges.rds")
 knitr::kable(tbl_ranges)
 ```
 
@@ -145,7 +145,7 @@ knitr::kable(cat_summary)
 
 ```{r}
 #| label: income-split
-tbl_income <- readRDS("../data/processed/tbl_income_split.rds")
+tbl_income <- readRDS("data/processed/tbl_income_split.rds")
 knitr::kable(tbl_income)
 ```
 
@@ -179,7 +179,7 @@ The age distributions for high and low earners are recognizably different in sha
 
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: age-density
-p_age <- readRDS("../data/processed/chart_age_density.rds")
+p_age <- readRDS("data/processed/chart_age_density.rds")
 p_age
 ```
 
@@ -199,7 +199,7 @@ Education is the single strongest numeric predictor of income in this dataset (c
 
 ```{r, fig.width=fig_lg$width, fig.height=fig_lg$height}
 #| label: education-trend
-p_edu <- readRDS("../data/processed/chart_edu_trend.rds")
+p_edu <- readRDS("data/processed/chart_edu_trend.rds")
 p_edu
 ```
 
@@ -223,7 +223,7 @@ Conditioning on marital status reveals a very different picture.
 
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: gender-marriage
-p_gm <- readRDS("../data/processed/chart_gender_marriage.rds")
+p_gm <- readRDS("data/processed/chart_gender_marriage.rds")
 p_gm
 ```
 
@@ -243,7 +243,7 @@ What this data cannot say: whether women in the same role as men were paid equal
 
 ```{r, fig.width=fig_tall(14)$width, fig.height=fig_tall(14)$height}
 #| label: occupation-ranking
-p_occ <- readRDS("../data/processed/chart_occ_lollipop.rds")
+p_occ <- readRDS("data/processed/chart_occ_lollipop.rds")
 p_occ
 ```
 
@@ -263,7 +263,7 @@ Capital gains are, for most people in this sample, simply absent.
 
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: capital-gains
-p_cg <- readRDS("../data/processed/chart_capital_gain.rds")
+p_cg <- readRDS("data/processed/chart_capital_gain.rds")
 p_cg
 ```
 
