@@ -82,14 +82,7 @@
         "Maintainer": "Winston Chang <winston@posit.co>",
         "Repository": "CRAN",
         "Date/Publication": "2025-02-15 00:50:02 UTC",
-        "Built": "R 4.6.0; ; 2026-04-25 15:39:09 UTC; unix",
-        "RemoteType": "standard",
-        "RemoteRef": "R6",
-        "RemotePkgRef": "R6",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.6.1"
+        "Built": "R 4.6.0; ; 2026-04-25 15:39:09 UTC; unix"
       }
     },
     "RColorBrewer": {
@@ -226,14 +219,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2024-10-04 07:20:03 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 23:17:34 UTC; unix",
-        "Archs": "askpass.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "askpass",
-        "RemotePkgRef": "askpass",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "1.2.1"
+        "Archs": "askpass.so.dSYM"
       }
     },
     "assertthat": {
@@ -654,14 +640,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-04-09 09:50:18 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:39:10 UTC; unix",
-        "Archs": "cli.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "cli",
-        "RemotePkgRef": "cli",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "3.6.6"
+        "Archs": "cli.so.dSYM"
       }
     },
     "clipr": {
@@ -832,14 +811,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-04-22 09:40:02 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 09:29:32 UTC; unix",
-        "Archs": "curl.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "curl",
-        "RemotePkgRef": "curl",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "7.1.0"
+        "Archs": "curl.so.dSYM"
       }
     },
     "data.table": {
@@ -942,14 +914,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2025-11-19 13:20:08 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:38:59 UTC; unix",
-        "Archs": "digest.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "digest",
-        "RemotePkgRef": "digest",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "0.6.39"
+        "Archs": "digest.so.dSYM"
       }
     },
     "dplyr": {
@@ -1384,14 +1349,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-04-17 05:11:01 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:39:32 UTC; unix",
-        "Archs": "glue.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "glue",
-        "RemotePkgRef": "glue",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "1.8.1"
+        "Archs": "glue.so.dSYM"
       }
     },
     "googledrive": {
@@ -1814,14 +1772,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2025-03-27 06:40:02 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:39:00 UTC; unix",
-        "Archs": "jsonlite.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "jsonlite",
-        "RemotePkgRef": "jsonlite",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.0.0"
+        "Archs": "jsonlite.so.dSYM"
       }
     },
     "knitr": {
@@ -1916,14 +1867,7 @@
         "Maintainer": "Lionel Henry <lionel@posit.co>",
         "Repository": "CRAN",
         "Date/Publication": "2026-01-08 08:00:02 UTC",
-        "Built": "R 4.6.0; ; 2026-04-25 10:32:18 UTC; unix",
-        "RemoteType": "standard",
-        "RemoteRef": "lifecycle",
-        "RemotePkgRef": "lifecycle",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "1.0.5"
+        "Built": "R 4.6.0; ; 2026-04-25 10:32:18 UTC; unix"
       }
     },
     "lubridate": {
@@ -1995,14 +1939,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-04-04 08:00:02 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:39:33 UTC; unix",
-        "Archs": "magrittr.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "magrittr",
-        "RemotePkgRef": "magrittr",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.0.5"
+        "Archs": "magrittr.so.dSYM"
       }
     },
     "memoise": {
@@ -2132,14 +2069,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-06-09 13:30:02 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-06-09 16:28:40 UTC; unix",
-        "Archs": "openssl.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "openssl",
-        "RemotePkgRef": "openssl",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.4.2"
+        "Archs": "openssl.so.dSYM"
       }
     },
     "otel": {
@@ -2753,14 +2683,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-07-05 08:40:02 UTC",
         "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-07-05 10:40:38 UTC; unix",
-        "Archs": "rlang.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "rlang",
-        "RemotePkgRef": "rlang",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "1.3.0"
+        "Archs": "rlang.so.dSYM"
       }
     },
     "rmarkdown": {
@@ -2791,14 +2714,7 @@
         "Maintainer": "Yihui Xie <xie@yihui.name>",
         "Repository": "CRAN",
         "Date/Publication": "2026-03-26 16:30:02 UTC",
-        "Built": "R 4.6.0; ; 2026-04-26 11:07:48 UTC; unix",
-        "RemoteType": "standard",
-        "RemoteRef": "rmarkdown",
-        "RemotePkgRef": "rmarkdown",
-        "RemoteRepos": "https://cran.rstudio.com",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.31"
+        "Built": "R 4.6.0; ; 2026-04-26 11:07:48 UTC; unix"
       }
     },
     "rstudioapi": {
@@ -2823,14 +2739,7 @@
         "Author": "Kevin Ushey [aut, cre],\n  JJ Allaire [aut],\n  Hadley Wickham [aut],\n  Gary Ritchie [aut],\n  RStudio [cph]",
         "Repository": "CRAN",
         "Date/Publication": "2026-06-11 23:10:02 UTC",
-        "Built": "R 4.6.0; ; 2026-06-12 01:39:39 UTC; unix",
-        "RemoteType": "standard",
-        "RemoteRef": "rstudioapi",
-        "RemotePkgRef": "rstudioapi",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "0.19.0"
+        "Built": "R 4.6.0; ; 2026-06-12 01:39:39 UTC; unix"
       }
     },
     "rvest": {
@@ -3077,14 +2986,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2024-10-04 09:40:02 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:48:55 UTC; unix",
-        "Archs": "sys.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "sys",
-        "RemotePkgRef": "sys",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "3.4.3"
+        "Archs": "sys.so.dSYM"
       }
     },
     "systemfonts": {
@@ -3525,14 +3427,7 @@
         "Repository": "CRAN",
         "Date/Publication": "2026-04-11 06:20:03 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 23:15:23 UTC; unix",
-        "Archs": "vctrs.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "vctrs",
-        "RemotePkgRef": "vctrs",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "0.7.3"
+        "Archs": "vctrs.so.dSYM"
       }
     },
     "viridisLite": {
@@ -3639,14 +3534,7 @@
         "Maintainer": "Lionel Henry <lionel@posit.co>",
         "Repository": "CRAN",
         "Date/Publication": "2026-06-19 05:30:02 UTC",
-        "Built": "R 4.6.0; ; 2026-06-19 06:07:49 UTC; unix",
-        "RemoteType": "standard",
-        "RemoteRef": "withr",
-        "RemotePkgRef": "withr",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "3.0.3"
+        "Built": "R 4.6.0; ; 2026-06-19 06:07:49 UTC; unix"
       }
     },
     "xfun": {
@@ -3750,20 +3638,13 @@
         "Repository": "CRAN",
         "Date/Publication": "2025-12-10 07:00:01 UTC",
         "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-04-25 15:39:54 UTC; unix",
-        "Archs": "yaml.so.dSYM",
-        "RemoteType": "standard",
-        "RemoteRef": "yaml",
-        "RemotePkgRef": "yaml",
-        "RemoteRepos": "https://cloud.r-project.org",
-        "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "aarch64-apple-darwin23",
-        "RemoteSha": "2.3.12"
+        "Archs": "yaml.so.dSYM"
       }
     }
   },
   "files": {
     ".Rprofile": {
-      "checksum": "3fc411c96190b78e55a20a8414f2beb3"
+      "checksum": "6886810ef04ee9563452612424dc93a4"
     },
     "data/processed/adult_clean.parquet": {
       "checksum": "9eb682c866380109d8714fd9bdbe6617"
