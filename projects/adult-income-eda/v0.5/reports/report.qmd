@@ -19,7 +19,7 @@ execute:
 #| include: false
 library(tidyverse)
 library(arrow)
-source("../R/style_tokens.R")
+source("styles/style_tokens.R")
 ```
 
 # Introduction
@@ -49,10 +49,10 @@ col_names <- c("age", "workclass", "fnlwgt", "education", "education_num",
                "marital_status", "occupation", "relationship", "race", "sex",
                "capital_gain", "capital_loss", "hours_per_week", "native_country",
                "income")
-raw <- read_csv("../data/raw/adult.data", col_names = col_names, na = character(),
+raw <- read_csv("data/raw/adult.data", col_names = col_names, na = character(),
                  trim_ws = TRUE, show_col_types = FALSE) %>%
   mutate(across(where(is.character), str_trim))
-df <- read_parquet("../data/processed/adult_clean.parquet")
+df <- read_parquet("data/processed/adult_clean.parquet")
 ```
 
 **Data dictionary** (condensed from `adult.names`): `fnlwgt` is *not* a personal attribute — it is the CPS sampling weight, the Census Bureau's estimate of how many people in the actual U.S. population this one record represents, controlled to independent population totals by state, Hispanic origin, race, age, and sex. It should never be treated as an ordinary numeric predictor. `education` and `education_num` are perfectly redundant (verified below) — one ordinal encoding of the other.
@@ -63,7 +63,7 @@ df <- read_parquet("../data/processed/adult_clean.parquet")
 
 ```{r}
 #| label: record-count-r
-read_parquet("../data/processed/tbl_record_count.parquet") %>% knitr::kable()
+read_parquet("data/processed/tbl_record_count.parquet") %>% knitr::kable()
 ```
 
 Matches the documented train-split count exactly.
@@ -74,7 +74,7 @@ A direct `NA` check across all 15 columns comes back completely clean — but th
 
 ```{r}
 #| label: nulls-r
-read_parquet("../data/processed/tbl_nulls.parquet") %>% knitr::kable()
+read_parquet("data/processed/tbl_nulls.parquet") %>% knitr::kable()
 ```
 
 Handling: `"?"` recoded to true `NA` in `data/processed/adult_clean.parquet`, so downstream summaries don't silently treat "unknown" as its own factor level.
@@ -85,7 +85,7 @@ Handling: `"?"` recoded to true `NA` in `data/processed/adult_clean.parquet`, so
 
 ```{r}
 #| label: numeric-ranges-r
-read_parquet("../data/processed/tbl_numeric_ranges.parquet") %>% knitr::kable()
+read_parquet("data/processed/tbl_numeric_ranges.parquet") %>% knitr::kable()
 ```
 
 All ranges are plausible for a CPS extract pre-filtered to `age > 16` and `hours-per-week > 0` — no negative ages, no zero-hour work weeks, no out-of-range education codes. Two values need a closer look, not because they're implausible but because of what they represent:
@@ -99,7 +99,7 @@ All ranges are plausible for a CPS extract pre-filtered to `age > 16` and `hours
 
 ```{r}
 #| label: categorical-levels-r
-read_parquet("../data/processed/tbl_categorical_levels.parquet") %>% knitr::kable()
+read_parquet("data/processed/tbl_categorical_levels.parquet") %>% knitr::kable()
 ```
 
 `native_country` (42 levels) and `occupation` (15 levels) are the two columns with enough categories that a raw bar/lollipop chart risks becoming unreadable or uninformative — `occupation` is checked against an authoritative external classification in the Visualization section below (it turns out to already match one, rather than needing to be collapsed). Verified separately that `education`/`education_num` are a strict 1-to-1 mapping (16 distinct pairs for 16 distinct education strings), confirming the redundancy noted in the data dictionary above. A duplicate-row scan also found 24 fully-duplicate records (all columns including `income` identical) out of 32,561 — small enough not to materially affect any statistic in this report, left in rather than silently dropped, and noted here rather than reconciled against the codebook's own "6 duplicate/conflicting instances" figure (that figure describes the combined train+test file, not the train split alone, and the two numbers don't cleanly reconcile — flagged as an open question rather than resolved by guessing).
@@ -119,14 +119,14 @@ read_parquet("../data/processed/tbl_categorical_levels.parquet") %>% knitr::kabl
 
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: hours-dist-r
-readRDS("../data/processed/chart_hours_dist.rds")
+readRDS("data/processed/chart_hours_dist.rds")
 ```
 
 Hours worked concentrates overwhelmingly at the standard 40-hour week, with real (not error-driven) mass on both sides — a long-standing pattern in labor statistics, not a quirk of this sample.
 
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: capgain-dist-r
-readRDS("../data/processed/chart_capital_gain.rds")
+readRDS("data/processed/chart_capital_gain.rds")
 ```
 
 Among the 2,712 respondents (8.3% of the sample) with any nonzero capital gain, the distribution thins out smoothly until the very top — where it spikes back up at exactly 99,999. That spike is not a natural continuation of the trend; it is where the Census Bureau's disclosure-avoidance topcoding cuts in.
@@ -136,7 +136,7 @@ Among the 2,712 respondents (8.3% of the sample) with any nonzero capital gain, 
 <!-- insight:education-threshold:start -->
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: education-trend-r
-readRDS("../data/processed/chart_education_trend.rds")
+readRDS("data/processed/chart_education_trend.rds")
 ```
 
 The relationship between education and the odds of earning over $50K is not gently increasing — it is close to flat through secondary schooling (every level from Preschool through 12th grade sits under 8%), and then rises steeply from HS-grad onward. The 50% line is crossed between a Bachelor's degree (41.5% earn >$50K) and a Master's degree (55.7%) — at roughly the Bachelor's-plus-some-graduate-coursework point on this ordinal scale. Beyond that, the professional and doctoral tracks (Prof-school 73.4%, Doctorate 74.1%) cluster together near three-quarters, rather than continuing to climb — the returns to formal education taper once a research or professional credential is reached, at least as this single-year income threshold measures it.
@@ -149,7 +149,7 @@ Before ranking occupations, it's worth checking whether the raw 14-level `occupa
 
 ```{r, fig.width=fig_tall(14)$width, fig.height=fig_tall(14)$height}
 #| label: occupation-lollipop-r
-readRDS("../data/processed/chart_occupation_lollipop.rds")
+readRDS("data/processed/chart_occupation_lollipop.rds")
 ```
 
 The spread is the widest of any categorical variable checked in this analysis: Executive/managerial and Professional specialty roles clear $50K roughly half the time (48.4% and 44.9%), while Private household service work sits at 0.7% — a 69-fold difference in rate between the top and bottom occupation groups. Farming-fishing and Handlers-cleaners round out the bottom alongside Other-service, all under 12%.
@@ -162,7 +162,7 @@ The spread is the widest of any categorical variable checked in this analysis: E
 <!-- insight:sex-gap-marriage:start -->
 ```{r, fig.width=fig_md$width, fig.height=fig_md$height}
 #| label: sex-gap-r
-readRDS("../data/processed/chart_sex_gap.rds")
+readRDS("data/processed/chart_sex_gap.rds")
 ```
 
 Across the full dataset, men clear $50K at nearly three times the rate of women (30.6% vs. 11.0%) — a large, real gap, and the kind of aggregate figure that would normally anchor a headline. But narrowing to respondents who are married with spouse present (`marital_status == "Married-civ-spouse"`) collapses that gap almost entirely: 44.6% of married men and 45.5% of married women clear $50K, despite wives in this subgroup working noticeably fewer average hours per week than husbands (36.7 vs. 44.1). The `relationship` column's `Wife` category alone (n=1,566) shows a 47.5% rate — fractionally *above* `Husband`'s 44.9%.
@@ -187,7 +187,7 @@ The same unit-matching caution applies to two other comparisons this dataset inv
 <!-- insight:workclass-unreported:start -->
 ```{r, fig.width=fig_tall(7)$width, fig.height=fig_tall(7)$height}
 #| label: workclass-rank-r
-readRDS("../data/processed/chart_workclass_rank.rds")
+readRDS("data/processed/chart_workclass_rank.rds")
 ```
 
 The natural first guess for "employer type unreported" is "not currently in the labor force" — but this dataset's own extraction criteria already required `hours-per-week > 0` for every row, so a genuinely non-working respondent could not appear at all. Checked directly: the 1,836 `workclass`-unreported respondents report a mean of 31.9 hours per week, and not one of them reports zero hours. They are working real hours and either declined to specify, or the survey could not resolve, what kind of employer they have. Their income profile is closer to `Never-worked`/`Without-pay` (both near 0%, though on tiny samples of 7 and 14) than to `Private` (21.9%) — a distinct labor-market position, not simply "unemployed," and one worth carrying as its own category rather than dropping or imputing it into `Private` by default in any downstream use.
