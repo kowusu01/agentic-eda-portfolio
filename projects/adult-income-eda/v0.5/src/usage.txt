@@ -1,0 +1,58 @@
+Session
+
+  Total cost:            $9.97
+  Total duration (API):  25m 48s
+  Total duration (wall): 1h 54m 18s
+  Total code changes:    455 lines added, 156 lines removed
+  Usage by model:
+      claude-haiku-4-5:  592.6k input, 11.0k output, 0 cache read, 0 cache write, 25 web search ($0.90)
+       claude-sonnet-5:  21.9k input, 108.8k output, 16.2m cache read, 474.5k cache write ($9.07)
+
+  Current session
+  █████████████████████████                          50% used
+  Resets 2:30am (America/New_York)
+
+  Current week (all models)
+  ████████████████                                   32% used
+  Resets Jul 25 at 9pm (America/New_York)
+
+  What's contributing to your limits usage?
+  Approximate, based on local sessions on this machine — does not include other devices or claude.ai
+
+  Last 24h · these are independent characteristics of your usage, not a breakdown
+
+  100% of your usage came from subagent-heavy sessions
+   Each subagent runs its own requests. Be deliberate about spawning them — and 
+   consider configuring a cheaper model for simpler subagents.
+
+  45% of your usage was at >150k context
+   Longer sessions are more expensive even when cached. /compact mid-task, /clear
+   when switching to new tasks.
+
+  12% of your usage came from subagents under "general-purpose"
+   If this runs frequently, consider configuring its subagents with a cheaper
+   model or tightening their prompts.
+
+
+  100% of your usage came from subagent-heavy sessions
+   Each subagent runs its own requests. Be deliberate about spawning them — and
+   consider configuring a cheaper model for simpler subagents.
+
+  45% of your usage was at >150k context
+   Longer sessions are more expensive even when cached. /compact mid-task, /clear
+   when switching to new tasks.
+
+  12% of your usage came from subagents under "general-purpose"
+   If this runs frequently, consider configuring its subagents with a cheaper
+   model or tightening their prompts.
+
+  Skills                  % of usage
+  /kwaku-eda                      4%
+
+  Subagents               % of usage
+  general-purpose                12%
+
+  d to day · w to week
+
+  Usage credits
+  Unlimited

@@ -1,0 +1,10 @@
+column,n_levels
+workclass,9
+education,16
+marital_status,7
+occupation,15
+relationship,6
+race,5
+sex,2
+native_country,42
+income,2

@@ -14,15 +14,32 @@ agentic-eda-portfolio/
 ├── .gitignore
 ├── projects/
 │   ├── project-one/
-│   │   ├── project-one.qmd
-│   │   ├── data/
-│   │   └── manifest.json
+|   |   |   ├── v0/
+|   |   |   |   ├── src/
+|   |   |   |   |   |   ├── src1.R/src1.py
+|   |   |   |   |   |   ├── src1.R/src2.py
+|   |   |   |   ├── reports/
+|   |   |   |   |   |   ├── manifest.json
+|   |   |   |   |   |   ├── report.qmd
+|   |   |   |   |   |   ├── data/
+|   |   |   |   |   |   ├── insights/
+|   |   |   |   |   |   ├── styles/
+|   |   |   ├── v1/
+|   |   |   |   ├── src/
+|   |   |   |   |   |   ├── src1.R/src1.py
+|   |   |   |   |   |   ├── src1.R/src2.py
+|   |   |   |   ├── reports/
+|   |   |   |   |   |   ├── manifest.json
+|   |   |   |   |   |   ├── report.qmd
+|   |   |   |   |   |   ├── data/
+|   |   |   |   |   |   ├── insights/
+|   |   |   |   |   |   ├── styles/
+│   |   └── manifest.json
 │   ├── project-two/
-│   │   ├── project-two.qmd
-│   │   └── manifest.json
-│   └── project-three/
-│       ├── project-three.qmd
-│       └── manifest.json
+|   |   |   ├── v0/
+|   |   |   |   ├── src/
+|   |   |   |   ├── reports/
+|   |   |   |   |
 └── renv.lock          # optional, shared or per-project
 ```
 

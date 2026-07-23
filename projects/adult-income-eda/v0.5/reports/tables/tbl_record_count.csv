@@ -1,0 +1,2 @@
+Item,Expected,Actual,Notes
+Rows (train split),32561,32561,Matches adult.names documentation exactly.

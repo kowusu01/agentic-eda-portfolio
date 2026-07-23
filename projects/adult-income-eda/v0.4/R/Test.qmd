@@ -1,0 +1,35 @@
+---
+title: "Test ggplot new version and RDS"
+author: "Kwaku Owusu-Tieku"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+engine: knitr
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(arrow)
+```
+
+
+```{r}
+mtcarsPlot <- readRDS("mtcars.RDS")
+mtcarsPlot
+```
+
+```{r, fig.width=fig_tall(14)$width, fig.height=fig_tall(14)$height}
+#| label: occupation-ranking
+p_occ <- readRDS("chart_age_density.rds")
+p_occ
+```

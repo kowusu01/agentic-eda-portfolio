@@ -1,0 +1,7 @@
+column,min,max,mean,median,sd
+age,17,90,38.6,37,13.6
+fnlwgt,12285,1484705,189778.4,178356,105550
+education_num,1,16,10.1,10,2.6
+capital_gain,0,99999,1077.6,0,7385.3
+capital_loss,0,4356,87.3,0,403
+hours_per_week,1,99,40.4,40,12.3

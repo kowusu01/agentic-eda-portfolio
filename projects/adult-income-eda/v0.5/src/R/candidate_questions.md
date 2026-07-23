@@ -1,0 +1,47 @@
+# Phase 3 — Candidate Questions (full pool)
+
+Working record, not client-facing — generated via the structural sweep (every categorical variable against the income outcome, every anomaly already noticed in Phase 1/2, every Phase 0 benchmark, any expected variable interaction) before narrative selection. Selected questions and reasoning are at the bottom.
+
+## Structural sweep: categorical variables vs. income
+
+| Variable | Pattern found | Habits-of-attention angle |
+|---|---|---|
+| `education` (ordered via `education_num`) | Monotonic, steep: 0% (Preschool) → 74.1% (Doctorate); crosses 50% between Bachelors (41.5%) and Masters (55.7%) | Threshold question: exactly where does more schooling start predicting a >50% chance of high income? |
+| `occupation` | 0.7% (Priv-house-serv) to 48.4% (Exec-managerial), 14 levels, no natural ordering | Ranking question; also a reclassification candidate (14 raw levels is a lot for a lollipop — is there an authoritative external scheme to collapse into major groups?) |
+| `sex` | 30.6% (Male) vs. 11.0% (Female) — large gap | Disparity question; but is it really about sex, or about who's a "Wife" vs. "Own-child"/"Unmarried" in this sample (see interaction row below)? |
+| `race` | White 25.6%, Asian-Pac-Islander 26.6% (*higher* than White), Black 12.4%, Amer-Indian-Eskimo 11.6%, Other 9.2% | The white/non-white framing a lazier analysis might default to is contradicted by Asian-Pac-Islander's rate exceeding White's — worth naming explicitly rather than collapsing to a binary. |
+| `workclass` | Self-emp-inc highest (55.7%), `NA`/unreported lowest among people who do report hours (10.4%), Never-worked/Without-pay ~0% (tiny n) | Who are the `workclass`-missing? Already flagged in Phase 1 as structurally tied to `occupation` missingness — worth asking what these ~1,836 people's condition actually is. |
+| `marital_status` | Strongest categorical association with income of any variable tested (Cramér's V = 0.447): Married-civ-spouse 44.7% vs. Never-married 4.6% | Is this really marital status, or age/lifecycle stage riding along with it? |
+| `native_country` (US vs. non-US) | US 24.6% vs. non-US 18.7% — real but modest gap | Immigration/nativity angle — smaller effect than expected given the variable's prominence in the schema (42 countries). |
+| `hours_per_week` (bucketed) | Rises with hours up to the 50–60 bucket (43.4%), then **falls** in the 60–100 bucket (36.4%) | Non-monotonic — more hours doesn't keep paying off past a point. What's happening in the highest-hours bucket? |
+
+## Anomalies/surprises already noted in Phase 1/2 → questions they raise
+
+1. **`capital_gain` topcoded at exactly 99,999 for 159 rows**, and *all 159* are labeled `>50K`. → Not really a question about the data being wrong — a question about what this censoring means for anyone who'd model this column as a literal dollar figure rather than "at least this much, true value suppressed."
+2. **`workclass` missingness is structural, not random** — every `workclass`-NA row is also `occupation`-NA (1,836/1,836), and the 7 extra `occupation`-only-NA rows are exactly the `Never-worked` respondents. But `workclass`-NA people are *not* the same as "not working": their mean `hours_per_week` is 31.9, none report 0 hours. → Who is working real hours but won't or can't name what kind of employer they have? This reads as a distinct labor-market position (informal/irregular work, or a specific survey non-response pattern), not simple unemployment — and their 10.4% >50K rate sits closer to the "Never-worked" (0%) end than to `Private` (21.9%).
+3. **`fnlwgt` is a sampling weight, not a personal attribute** (Phase 1). Not pursued as an income-relationship question — flagged instead as a caution against ever treating it as an ordinary numeric predictor.
+4. **`hours_per_week`'s IQR-flagged "outlier" rate (27.7%) is inflated by the variable's own shape** — a strong central mode at exactly 40 with a long, genuinely plausible two-sided tail (part-time work down to 1 hour, overwork up to 99), not a data-quality problem. → Not a Phase 3 question on its own, but shapes how the distribution gets visualized (a plain histogram, not an outlier-highlighting chart, since "outlier" here would overstate the case).
+
+## Variable interaction a domain-knowledgeable reader would expect to matter
+
+5. **Sex × marital status/relationship, on income.** The aggregate 30.6%-vs-11.0% sex gap almost entirely closes within `Married-civ-spouse`: 44.6% (male) vs. 45.5% (female), nearly identical age (43.7 vs. 39.5) and education (10.3 vs. 10.4), despite wives working fewer average hours (36.7 vs. 44.1). Meanwhile the `Wife` relationship category alone (n=1,566) shows a 47.5% >50K rate — far above the 11.0% rate for women overall, and even fractionally above `Husband`'s 44.9%. → The aggregate sex gap is real, but it is not evenly distributed across women — it is concentrated in the much larger population of women who are `Own-child` (1.1%), `Unmarried` (4.2%), or `Not-in-family` (7.3%), not in married women, who show almost no individual-income gap relative to their husbands. This is exactly the kind of subgroup an aggregate "women earn less" headline would smooth over.
+6. **Sex × occupation.** Cramér's V = 0.434 (stronger than sex × income at 0.216) — women concentrated in Adm-clerical (25.5% of employed women), Other-service (18.1%), Men concentrated in Craft-repair (18.7%), Exec-managerial (14.0%). → Occupational segregation by sex is a plausible mechanism behind part of the aggregate pay gap, worth naming even without a formal decomposition (which would cross into modeling, out of scope here).
+
+## Phase 0 external benchmarks → match, diverge, or units mismatch?
+
+7. **This dataset's 24.08% >$50K rate (individual income) vs. published 1994-era Census/BLS income distributions.** Requires explicit unit-matching (individual vs. household income) before any comparison is meaningful — see Phase 0 findings below.
+8. **Sex-based earnings gap in this data (30.6% vs. 11.0% crossing the $50K line) vs. the published mid-1990s female-to-male earnings ratio.** Different measures (a threshold-crossing rate here vs. a median-ratio in the published series) — comparable in direction, not in magnitude, without more care.
+9. **Race-based earnings gap in this data vs. published mid-1990s Black-white earnings figures.**
+
+---
+
+## Selected for the report (4–6), with reasoning
+
+1. **Education → income, threshold-crossing.** *Why selected:* cleanest, most decision-relevant pattern in the data; directly usable with the threshold-crossing trend-line chart pattern; ties to a well-established external literature on education wage premiums even though this analysis stops short of citing dataset-specific papers (Circular Grounding Trap).
+2. **Occupation → income, ranked, checked against an authoritative external scheme.** *Why selected:* 14 raw levels looked like exactly the "too many levels to be useful, needs collapsing" case the Authoritative Reclassification pattern exists for. **Revised after Phase 0 research returned:** the 14 levels turn out to already be a near-verbatim match to the Census Bureau's own 1990 13-major-occupation-group scheme (Technical Paper 65) — so the finding became "this field is already authoritatively classified," not "here's how to collapse it." Kept in the report because that's a more useful and more surprising finding than the originally-planned collapsing exercise would have been. The spread (0.7% to 48.4%) is still the widest of any categorical variable tested.
+3. **The sex gap that disappears within marriage.** *Why selected:* the single most counter-intuitive finding in the whole analysis — directly answers "what would most analysts smooth over." A closer look shows it's not truly gone (occupational segregation, hours differences persist) but the raw income-threshold gap specifically closes.
+4. **The `workclass`-missing population's real condition.** *Why selected:* turns a Phase-1 data-quality footnote into a substantive finding about who this framing doesn't cleanly categorize — directly answers "who is in this dataset that the framing did not account for."
+5. **`capital_gain` topcoding as a downstream-modeling flag.** *Why selected:* small in scope but a concrete, verifiable (not just visually impressed) case of Census disclosure-avoidance censoring that would silently mislead a model if untreated.
+6. **External benchmark: is $50K a demanding bar in 1994, and does that explain the low positive rate?** *Why selected:* required by the protocol's Phase 0 obligations; also directly explains why "only 24% clear this bar" is not itself surprising once the era and the individual/household unit mismatch are named.
+
+**Not selected, and why:** race (real, but the more interesting version of "race matters" here is the specific Asian-Pac-Islander-above-White finding, folded into the write-up as a caution rather than expanded into its own section); native-country US-vs-non-US (real but modest effect, 24.6% vs 18.7%, doesn't add a new kind of story beyond what education/occupation already show); hours-per-week non-monotonicity (genuine, but secondary — mentioned in passing under the education/occupation narrative rather than given its own section, since it doesn't carry as much decision-relevance); sex × occupation segregation (folded into finding 3 as the explanation for why the sex gap persists elsewhere even though it vanishes within marriage, rather than a standalone section).

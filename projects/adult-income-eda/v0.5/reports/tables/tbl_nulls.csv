@@ -1,0 +1,4 @@
+column,n_disguised_na,pct_of_rows,handling
+workclass,1836,5.64,Recoded '?' -> NA in data/processed/adult_clean.parquet
+occupation,1843,5.66,Recoded '?' -> NA in data/processed/adult_clean.parquet
+native_country,583,1.79,Recoded '?' -> NA in data/processed/adult_clean.parquet
