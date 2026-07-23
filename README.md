@@ -16,8 +16,7 @@ agentic-eda-portfolio/
 │   ├── project-one/
 |   |   |   ├── v0/
 |   |   |   |   ├── src/
-|   |   |   |   |   |   ├── src1.R/src1.py
-|   |   |   |   |   |   ├── src1.R/src2.py
+|   |   |   |   |   |   ├── R or Python specific folder sturcture/
 |   |   |   |   ├── reports/
 |   |   |   |   |   |   ├── manifest.json
 |   |   |   |   |   |   ├── report.qmd

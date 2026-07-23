@@ -1,0 +1,256 @@
+---
+title: "kwaku-eda Usage Dashboard"
+format:
+  html:
+    theme: none
+    toc: false
+    title-block-banner: false
+---
+
+<style>
+  :root {
+    --page:      #f9f9f7;
+    --surface:   #fcfcfb;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --grid:      #e1e0d9;
+    --border:    rgba(11,11,11,0.10);
+    --run1:      #2a78d6; /* test-1, blue */
+    --run2:      #1baf7a; /* test-3, aqua */
+    --run3:      #eda100; /* test-4, yellow */
+    --run4:      #008300; /* test-5, green */
+    --warn:      #fab219;
+    --warn-ink:  #7a5200;
+    --crit:      #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --run1: #3987e5; --run2: #199e70; --run3: #c98500; --run4: #008300;
+      --warn: #fab219; --warn-ink: #3a2a00; --crit: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --run1: #3987e5; --run2: #199e70; --run3: #c98500; --run4: #008300; --warn-ink: #3a2a00; --crit: #e66767;
+  }
+  :root[data-theme="light"] {
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --run1: #2a78d6; --run2: #1baf7a; --run3: #eda100; --run4: #008300; --warn-ink: #7a5200; --crit: #d03b3b;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+  #quarto-content, main { max-width: none !important; padding: 0 !important; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 40px 24px 72px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  header.dash { margin-bottom: 32px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; color: var(--muted); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; text-wrap: balance; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-2); font-size: 14px; margin: 0; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0 28px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .tile .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .tile .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .tile .sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 10px; border-radius: 999px; font-weight: 600; border: 1px solid var(--border); }
+  .chip.warn { background: color-mix(in srgb, var(--warn) 16%, var(--surface)); color: var(--warn-ink); }
+  .chip.crit { background: color-mix(in srgb, var(--crit) 14%, var(--surface)); color: var(--crit); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  section.dash { margin: 32px 0; }
+  h2 { font-size: 15px; font-weight: 700; margin: 0 0 3px; }
+  h2 + .caption { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  table.dash { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 12.5px; }
+  table.dash th, table.dash td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  table.dash th { color: var(--muted); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.dash tr:last-child td { border-bottom: none; }
+  table.dash td.num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  table.dash td.notes { white-space: normal; color: var(--ink-2); min-width: 220px; }
+  .run-dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 7px; vertical-align: middle; }
+  .na { color: var(--muted); font-style: italic; }
+
+  .chart { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px 12px; }
+  .bar-row { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 10px; margin: 10px 0; }
+  .bar-row .rlabel { font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .bar-track { position: relative; height: 20px; background: var(--page); border-radius: 4px; overflow: hidden; }
+  .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px 0 0 4px; }
+  .bar-fill.hatched { background-image: repeating-linear-gradient(45deg, var(--muted) 0 2px, transparent 2px 8px); opacity: 0.55; }
+  .bar-value { font-size: 12.5px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .stackbar { height: 24px; border-radius: 4px; overflow: hidden; display: flex; background: var(--page); }
+  .stack-active { display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; color: #fff; }
+  .stack-idle { display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: var(--ink-2); }
+  .legend { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+
+  .confounds { display: grid; gap: 8px; }
+  .confound { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--run3); border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+  .confound b { margin-right: 4px; }
+
+  .pullquote { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; font-size: 13px; color: var(--ink-2); font-style: italic; }
+  .pullquote footer { margin-top: 6px; font-style: normal; font-size: 11.5px; color: var(--muted); border: none; padding: 0; }
+
+  footer.dash { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--grid); color: var(--muted); font-size: 11.5px; }
+  footer.dash ol { margin: 6px 0 0; padding-left: 18px; }
+  footer.dash li { margin: 3px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--page); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+
+  @media (max-width: 640px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .bar-row { grid-template-columns: 64px 1fr 64px; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="dash">
+<p class="eyebrow">agents-tests · kwaku-eda skill · 4 runs, 2026-07-10 → 07-22</p>
+<h1>kwaku-eda test runs — usage &amp; cost</h1>
+<p class="lede">Updated manually after each run — paste the new <code>/usage</code> numbers and ask for a recalc. See <a href="#going-forward">Going forward</a>.</p>
+</header>
+
+<div class="tiles">
+  <div class="tile"><div class="label">Runs tracked</div><div class="value">4</div><div class="sub">1 with no cost captured</div></div>
+  <div class="tile"><div class="label">Captured spend</div><div class="value">$24.56</div><div class="sub">test-3/4/5 only</div></div>
+  <div class="tile"><div class="label">Model generations</div><div class="value">2</div><div class="sub">sonnet-4-6 → sonnet-5</div></div>
+  <div class="tile"><div class="label">Median idle gap</div><div class="value">~88 min</div><div class="sub">wall time, not active API</div></div>
+</div>
+
+<div class="chips">
+  <span class="chip crit"><span class="dot"></span>test-1: no /usage ever run — cost unrecoverable</span>
+  <span class="chip crit"><span class="dot"></span>test-3: project files lost — report unrecoverable</span>
+  <span class="chip warn"><span class="dot"></span>test-5: $9.97 is partial — captured mid-session</span>
+</div>
+
+<section class="dash">
+<h2>All runs</h2>
+<p class="caption">Dashes mean the number isn't recoverable, not zero.</p>
+<div class="tablewrap">
+<table class="dash">
+<thead><tr>
+  <th>Run</th><th>Report</th><th>Window (ET)</th><th>Lang</th><th>Model(s)</th>
+  <th>Cost</th><th>API active</th><th>Wall</th><th>Lines ±</th><th>Notes</th>
+</tr></thead>
+<tbody>
+<tr id="test-1">
+  <td><span class="run-dot" style="background:var(--run1)"></span>test-1</td>
+  <td><a href="../test-1/eda-report-test-1.pdf">PDF</a></td>
+  <td class="num">07-10 23:08 – 07-11 07:06</td>
+  <td>Python</td>
+  <td>sonnet-4-6</td>
+  <td class="num na">not captured</td>
+  <td class="num na">—</td>
+  <td class="num na">—</td>
+  <td class="num na">—</td>
+  <td class="notes">No <code>/usage</code> ever run; project files gone too — PDF only.</td>
+</tr>
+<tr id="test-3">
+  <td><span class="run-dot" style="background:var(--run2)"></span>test-3</td>
+  <td class="na">lost</td>
+  <td class="num">07-20 00:17 – 16:20</td>
+  <td>Python</td>
+  <td>haiku-4-5 + sonnet-4-6</td>
+  <td class="num">$8.02</td>
+  <td class="num">33m 45s</td>
+  <td class="num">2h 4m 11s</td>
+  <td class="num">+1174 / −11</td>
+  <td class="notes">Project files lost — only usage notes survive.</td>
+</tr>
+<tr id="test-4">
+  <td><span class="run-dot" style="background:var(--run3)"></span>test-4</td>
+  <td><a href="PENDING-PUBLISH-URL-TEST-4">↗</a></td>
+  <td class="num">07-21 20:44 – 23:20</td>
+  <td>R</td>
+  <td>haiku-4-5 + sonnet-5</td>
+  <td class="num">$6.57</td>
+  <td class="num">19m 55s</td>
+  <td class="num">1h 46m 53s</td>
+  <td class="num">+1042 / −150</td>
+  <td class="notes">Cleanest capture — wall ≈ calendar span.</td>
+</tr>
+<tr id="test-5">
+  <td><span class="run-dot" style="background:var(--run4)"></span>test-5</td>
+  <td><a href="PENDING-PUBLISH-URL-TEST-5">↗</a></td>
+  <td class="num">07-21 23:38 – (ongoing)</td>
+  <td>R</td>
+  <td>haiku-4-5 + sonnet-5</td>
+  <td class="num">$9.97*</td>
+  <td class="num">25m 48s</td>
+  <td class="num">1h 54m 18s</td>
+  <td class="num">+455 / −156</td>
+  <td class="notes">*Partial (mid-session snapshot); ran a background research subagent.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="dash">
+<h2>Cost by run</h2>
+<p class="caption">test-1's bar is hatched — no number to show, not zero cost.</p>
+<div class="chart">
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run1)"></span>test-1</div><div class="bar-track"><div class="bar-fill hatched" style="width:100%; background-color:var(--run1);"></div></div><div class="bar-value na">n/a</div></div>
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run2)"></span>test-3</div><div class="bar-track"><div class="bar-fill" style="width:80.4%; background:var(--run2);"></div></div><div class="bar-value">$8.02</div></div>
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run3)"></span>test-4</div><div class="bar-track"><div class="bar-fill" style="width:65.9%; background:var(--run3);"></div></div><div class="bar-value">$6.57</div></div>
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run4)"></span>test-5</div><div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--run4);"></div></div><div class="bar-value">$9.97*</div></div>
+</div>
+</section>
+
+<section class="dash">
+<h2>Cost per 100 lines changed</h2>
+<p class="caption">test-5 looks worse here mainly because of a background research subagent — cost without lines.</p>
+<div class="chart">
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run2)"></span>test-3</div><div class="bar-track"><div class="bar-fill" style="width:41.5%; background:var(--run2);"></div></div><div class="bar-value">$0.68</div></div>
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run3)"></span>test-4</div><div class="bar-track"><div class="bar-fill" style="width:33.8%; background:var(--run3);"></div></div><div class="bar-value">$0.55</div></div>
+<div class="bar-row"><div class="rlabel"><span class="run-dot" style="background:var(--run4)"></span>test-5</div><div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--run4);"></div></div><div class="bar-value">$1.63</div></div>
+</div>
+</section>
+
+<section class="dash">
+<h2>API-active share of reported wall time</h2>
+<p class="caption">All three measured runs land in a tight band — looks systematic, not incidental.</p>
+<div class="chart">
+<div class="bar-row" style="grid-template-columns: 80px 1fr;"><div class="rlabel"><span class="run-dot" style="background:var(--run2)"></span>test-3</div><div class="stackbar"><div class="stack-active" style="width:27.2%; background:var(--run2);">27%</div><div class="stack-idle" style="width:72.8%;">idle 73%</div></div></div>
+<div class="bar-row" style="grid-template-columns: 80px 1fr;"><div class="rlabel"><span class="run-dot" style="background:var(--run3)"></span>test-4</div><div class="stackbar"><div class="stack-active" style="width:18.6%; background:var(--run3);">19%</div><div class="stack-idle" style="width:81.4%;">idle 81%</div></div></div>
+<div class="bar-row" style="grid-template-columns: 80px 1fr;"><div class="rlabel"><span class="run-dot" style="background:var(--run4)"></span>test-5</div><div class="stackbar"><div class="stack-active" style="width:22.6%; background:var(--run4);">23%</div><div class="stack-idle" style="width:77.4%;">idle 77%</div></div></div>
+<p class="legend">idle = waiting on you, or a rate limit</p>
+</div>
+</section>
+
+<section class="dash">
+<h2>Confounds</h2>
+<div class="confounds">
+<div class="confound"><b>Model changed mid-project:</b> test-1/3 on sonnet-4-6, test-4/5 on sonnet-5 — no same-model, same-language pair to isolate either variable.</div>
+<div class="confound"><b>Lines-changed ≠ effort:</b> test-5's higher cost/line is mostly a background research subagent (cost + wall-time, zero lines).</div>
+<div class="confound"><b>Wall-vs-API idle gap is remarkably consistent</b> (~87–90 min, all 3 measured runs) — looks like a recurring rate-limit wait, not random idling.</div>
+</div>
+</section>
+
+<div class="pullquote">
+"Higher cost, but also the most detailed, useful trail yet — for an SMB, an hour of work for ~$10 is still a huge saving. But if this is typical AI usage cost, it may put the technology out of reach for experimentation in poorer countries. Which raises the optimization question: a lighter mode (skip the log, extra visualizations) for cost-aware runs."
+<footer>— your notes on test-3, condensed; full text in <code>test-3/observations.txt</code></footer>
+</div>
+
+<footer class="dash" id="going-forward">
+<b>Going forward</b> — when a run finishes:
+<ol>
+<li>Run <code>/usage</code> only once truly done (not before a debrief that keeps spending in-session).</li>
+<li>Paste the numbers here and ask for a recalc — new table row, chips, chart bars, tiles.</li>
+<li>Publish the report, swap the <code>PENDING-PUBLISH-URL-*</code> placeholder for the real link.</li>
+<li>Note model, language, and any background subagent used.</li>
+</ol>
+Cost figures are taken from each run's own <code>/usage</code> snapshot, never recomputed from raw tokens. This page links out to each report; reports don't link back — usage is internal bookkeeping, not something a report reader needs. This is a manually-updated dashboard while the skill and run count are still moving, not a generated one — once things stabilize, tracking may move to a live per-version <code>manifest.json</code> instead.
+</footer>
+
+</div>

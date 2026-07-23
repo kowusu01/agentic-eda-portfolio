@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "locale": "en_US",
+  "platform": "4.6.1",
+  "metadata": {
+    "appmode": "quarto-static",
+    "primary_rmd": "usage-stats.qmd",
+    "primary_html": null,
+    "content_category": null,
+    "has_parameters": false
+  },
+  "quarto": {
+    "version": "1.9.38",
+    "engines": ["markdown"]
+  },
+  "packages": null,
+  "files": {
+    "kwaku-eda Test Runs — Usage Reconstruction.pdf": {
+      "checksum": "33129225db0664708547c6fc73cbd6b5"
+    },
+    "usage-stats.qmd": {
+      "checksum": "7c99ff9a66771ca1227d225bdbbfb544"
+    }
+  },
+  "users": null
+}
