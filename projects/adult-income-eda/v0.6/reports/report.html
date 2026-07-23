@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Kwaku Owusu-Tieku (EDA by Claude)">
+<meta name="dcterms.date" content="2026-07-23">
+
+<title>Adult / Census Income Dataset — Exploratory Data Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="report_files/libs/quarto-html/popper.min.js"></script>
+<script src="report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="report_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="report_files/libs/bootstrap/bootstrap-8ffd5f67044e5306d9846f29df41dda5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The Data</a>
+  <ul class="collapse">
+  <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
+  <li><a href="#reading-the-data" id="toc-reading-the-data" class="nav-link" data-scroll-target="#reading-the-data">Reading the Data</a></li>
+  </ul></li>
+  <li><a href="#data-quality-checks" id="toc-data-quality-checks" class="nav-link" data-scroll-target="#data-quality-checks">Data Quality Checks</a>
+  <ul class="collapse">
+  <li><a href="#record-count-verification" id="toc-record-count-verification" class="nav-link" data-scroll-target="#record-count-verification">Record Count Verification</a></li>
+  <li><a href="#null-missing-value-check" id="toc-null-missing-value-check" class="nav-link" data-scroll-target="#null-missing-value-check">Null / Missing Value Check</a></li>
+  <li><a href="#numeric-range-validation" id="toc-numeric-range-validation" class="nav-link" data-scroll-target="#numeric-range-validation">Numeric Range Validation</a></li>
+  <li><a href="#categorical-level-inventory" id="toc-categorical-level-inventory" class="nav-link" data-scroll-target="#categorical-level-inventory">Categorical Level Inventory</a></li>
+  </ul></li>
+  <li><a href="#data-visualization-and-exploration" id="toc-data-visualization-and-exploration" class="nav-link" data-scroll-target="#data-visualization-and-exploration">Data Visualization and Exploration</a>
+  <ul class="collapse">
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
+  <li><a href="#distributions" id="toc-distributions" class="nav-link" data-scroll-target="#distributions">Distributions</a></li>
+  <li><a href="#trends" id="toc-trends" class="nav-link" data-scroll-target="#trends">Trends</a></li>
+  <li><a href="#anomalies-and-domain-specific-findings" id="toc-anomalies-and-domain-specific-findings" class="nav-link" data-scroll-target="#anomalies-and-domain-specific-findings">Anomalies and Domain-Specific Findings</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a>
+  <ul class="collapse">
+  <li><a href="#analysis-approach-next-phase" id="toc-analysis-approach-next-phase" class="nav-link" data-scroll-target="#analysis-approach-next-phase">Analysis Approach (Next Phase)</a></li>
+  </ul></li>
+  <li><a href="#technical-notes" id="toc-technical-notes" class="nav-link" data-scroll-target="#technical-notes">Technical Notes</a>
+  <ul class="collapse">
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Adult / Census Income Dataset — Exploratory Data Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kwaku Owusu-Tieku (EDA by Claude) </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 23, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>This report explores the “Adult” dataset — a 32,561-row extract from the U.S. Census Bureau’s 1994 Current Population Survey (CPS), donated to the UCI Machine Learning Repository by Ronny Kohavi and Barry Becker. Each row is one working-age adult, described by 14 demographic and employment attributes (age, education, occupation, marital status, hours worked, and so on), alongside a binary label: whether that person’s annual income was above or below $50,000.</p>
+<p>This analysis asks four questions of the data, chosen because they’re the ones a reader relying on this dataset for anything beyond a machine-learning exercise would actually need answered: <strong>Does education pay off gradually, or is there a specific point where it becomes the majority outcome to earn over $50K? Does the large raw gap in earnings between men and women in this sample persist within the same occupation, or is it mostly explained by which occupations each sex is concentrated in? What does a data-quality artifact — capital gains capped at $99,999 — actually reveal about the people it affects? And who is quietly excluded from a “predict income” framing by the data’s own structure</strong> — the people who didn’t report an occupation at all, or who work extreme hours without an obvious payoff? Each is answered with the data directly, not asserted from the chart alone.</p>
+</section>
+<section id="the-data" class="level1">
+<h1>The Data</h1>
+<section id="source" class="level2">
+<h2 class="anchored" data-anchor-id="source">Source</h2>
+<p>Extracted from the 1994 Census Bureau CPS database by Barry Becker, using the filter conditions <code>age &gt; 16 &amp;&amp; AGI &gt; 100 &amp;&amp; fnlwgt &gt; 1 &amp;&amp; hours-per-week &gt; 0</code>, and donated to the UCI Machine Learning Repository in 1996. This is the 32,561-row training partition (<code>adult.data</code>); a separate 16,281-row test partition (<code>adult.test</code>) exists but is not used here. <strong>The data describes the United States as it was in 1994</strong> — over three decades before this report was written — and every figure below should be read as a historical snapshot, not a claim about current income, education, or labor-market conditions.</p>
+</section>
+<section id="reading-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="reading-the-data">Reading the Data</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 32,561
+Columns: 15
+$ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, 32,…
+$ workclass      &lt;chr&gt; "State-gov", "Self-emp-not-inc", "Private", "Private", …
+$ fnlwgt         &lt;dbl&gt; 77516, 83311, 215646, 234721, 338409, 284582, 160187, 2…
+$ education      &lt;chr&gt; "Bachelors", "Bachelors", "HS-grad", "11th", "Bachelors…
+$ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, 11,…
+$ marital_status &lt;chr&gt; "Never-married", "Married-civ-spouse", "Divorced", "Mar…
+$ occupation     &lt;chr&gt; "Adm-clerical", "Exec-managerial", "Handlers-cleaners",…
+$ relationship   &lt;chr&gt; "Not-in-family", "Husband", "Not-in-family", "Husband",…
+$ race           &lt;chr&gt; "White", "White", "White", "Black", "Black", "White", "…
+$ sex            &lt;chr&gt; "Male", "Male", "Male", "Male", "Female", "Female", "Fe…
+$ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, 0, …
+$ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, 50,…
+$ native_country &lt;chr&gt; "United-States", "United-States", "United-States", "Uni…
+$ income         &lt;fct&gt; &lt;=50K, &lt;=50K, &lt;=50K, &lt;=50K, &lt;=50K, &lt;=50K, &lt;=50K, &gt;50K, …</code></pre>
+</div>
+</div>
+<p>Column names were converted from the source’s hyphenated form (<code>marital-status</code>, <code>capital-gain</code>, etc.) to underscores for R compatibility; no other renaming was done. <code>education_num</code> is a numeric encoding of <code>education</code> — confirmed 1:1 (verified directly in <code>src/R/01_data_quality.R</code>, not assumed from the column names alone) — provided so ordinal comparisons across education levels don’t require re-deriving an ordering from the text labels. <code>fnlwgt</code> is a Census-computed sampling weight (raked against state, Hispanic-origin, and race/age/sex population controls), not a demographic attribute of the person it’s attached to — it is excluded from substantive analysis throughout this report, and <strong>every proportion or rate reported below is of this 32,561-row sample as collected, not reweighted to population totals.</strong> That distinction is confirmed, not just asserted: Phase 2’s group-comparison check (see Data Quality Checks) found <code>fnlwgt</code> shows no relationship to <code>income</code> — mean and spread are nearly identical across both income groups — which is exactly what should be true of an administrative weight and supports treating it as non-substantive rather than a variable worth analyzing on its own terms. <code>income</code> is the target label (<code>&lt;=50K</code> / <code>&gt;50K</code>).</p>
+</section>
+</section>
+<section id="data-quality-checks" class="level1">
+<h1>Data Quality Checks</h1>
+<section id="record-count-verification" class="level2">
+<h2 class="anchored" data-anchor-id="record-count-verification">Record Count Verification</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/qc_record_count.rds"</span>) <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">item</th>
+<th style="text-align: right;">expected</th>
+<th style="text-align: right;">actual</th>
+<th style="text-align: left;">notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rows</td>
+<td style="text-align: right;">32561</td>
+<td style="text-align: right;">32561</td>
+<td style="text-align: left;">Matches adult.names documentation exactly</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Matches the source documentation (<code>adult.names</code>) exactly: 32,561 rows in the training partition.</p>
+</section>
+<section id="null-missing-value-check" class="level2">
+<h2 class="anchored" data-anchor-id="null-missing-value-check">Null / Missing Value Check</h2>
+<p><code>adult.names</code> states that unknown values were recoded to the string <code>"?"</code> in this public-use file — there are no literal empty/NA cells, but three columns carry this disguised-null marker:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/qc_null_tbl.rds"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(n_missing <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">column</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">pct_missing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">occupation</td>
+<td style="text-align: right;">1843</td>
+<td style="text-align: right;">5.66</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">workclass</td>
+<td style="text-align: right;">1836</td>
+<td style="text-align: right;">5.64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">native_country</td>
+<td style="text-align: right;">583</td>
+<td style="text-align: right;">1.79</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>These are handled as genuine missing values (converted to <code>NA</code>) in the cleaned dataset, not dropped and not imputed — dropping rows would discard real information (see the missingness-pattern finding below), and imputing a categorical value here has no principled basis. <code>workclass</code> and <code>occupation</code> missingness turned out <strong>not</strong> to be independent: checking directly, all 1,836 rows missing <code>workclass</code> are also missing <code>occupation</code> (plus 7 more rows missing <code>occupation</code> alone) — a structural pattern consistent with CPS skip-logic (someone who reports no employment class has nothing to report an occupation within), not scattered non-response. <code>native_country</code> missingness, by contrast, is largely independent of that pattern: 95.4% of the 583 rows missing <code>native_country</code> still have a <code>workclass</code> reported, pointing to a separate, unrelated non-response mechanism (most plausibly the nativity question specifically) rather than a second symptom of the same skip-logic.</p>
+<p>A direct duplicate-row check also turned up 24 exact-duplicate rows in this 32,561-row file. <code>adult.names</code> reports “6 duplicate or conflicting instances,” but that figure is for the full 48,842-row combined <code>adult.all</code> file — not a contradiction, just a different denominator, worth stating explicitly rather than assuming the documented “6” applies to this file alone.</p>
+</section>
+<section id="numeric-range-validation" class="level2">
+<h2 class="anchored" data-anchor-id="numeric-range-validation">Numeric Range Validation</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/qc_numeric_range.rds"</span>) <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">column</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">median</th>
+<th style="text-align: right;">nzero</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">38.6</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fnlwgt</td>
+<td style="text-align: right;">12285</td>
+<td style="text-align: right;">1484705</td>
+<td style="text-align: right;">189778.4</td>
+<td style="text-align: right;">178356</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">education_num</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">10.1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">capital_gain</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">99999</td>
+<td style="text-align: right;">1077.6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">29849</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">capital_loss</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4356</td>
+<td style="text-align: right;">87.3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">31042</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hours_per_week</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">40.4</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>All ranges are domain-plausible (<code>age</code> 17–90, consistent with the extraction filter of <code>age &gt; 16</code>; <code>hours_per_week</code> 1–99). Two values are worth naming as outliers relative to their own column, not just checked against a plausible range: <code>capital_gain</code> tops out at exactly $99,999 with 159 rows sitting precisely at that value — a strong signature of Census-era income top-coding (a privacy-motivated cap on public-use files) rather than 159 people who organically reported that exact figure. <code>capital_loss</code> tops out at $4,356 with only 3 rows at that value — not an obvious top-code pattern, treated as a genuine maximum. Both <code>capital_gain</code> and <code>capital_loss</code> are heavily zero-inflated (91.6% and 95.3% zero respectively) rather than simply right-skewed — a distinction that matters for how they get charted (see Distributions, below).</p>
+</section>
+<section id="categorical-level-inventory" class="level2">
+<h2 class="anchored" data-anchor-id="categorical-level-inventory">Categorical Level Inventory</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/qc_categorical_inventory.rds"</span>) <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">column</th>
+<th style="text-align: right;">n_levels</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">workclass</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">education</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">marital_status</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">occupation</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">relationship</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">race</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sex</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">native_country</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">income</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>No inconsistent representations (free-text vs.&nbsp;controlled vocabulary) — all nine categorical columns use a fixed, documented vocabulary per <code>adult.names</code>. <code>native_country</code> (42 levels) and <code>occupation</code>/<code>education</code> (14–16 levels each) are large enough that per-category detail is shown selectively below rather than exhaustively.</p>
+</section>
+</section>
+<section id="data-visualization-and-exploration" class="level1">
+<h1>Data Visualization and Exploration</h1>
+<section id="questions" class="level2">
+<h2 class="anchored" data-anchor-id="questions">Questions</h2>
+<ol type="1">
+<li>At what education level does earning over $50K become the <em>majority</em> outcome, not just a more likely one — and where exactly does that threshold fall?</li>
+<li>The raw gender gap in this sample’s <code>&gt;50K</code> rate is large (30.6% of men vs.&nbsp;11.0% of women). Does that gap persist <em>within</em> the same occupation, or is it substantially explained by which occupations each sex is concentrated in?</li>
+<li>What does the $99,999 capital-gains top-code reveal about the people who hit it — and what does that imply about how well <code>income</code> captures income at the top of the distribution?</li>
+<li>Does working more hours keep paying off all the way to the extreme end of the range, or does that relationship turn over? And who are the roughly 1,836 people this dataset doesn’t have an occupation for at all?</li>
+</ol>
+</section>
+<section id="distributions" class="level2">
+<h2 class="anchored" data-anchor-id="distributions">Distributions</h2>
+<!-- insight:income-prevalence:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/chart_income_prevalence.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/distributions-income-prevalence-r-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>24.1% of this sample earned over $50,000 in 1994 — close to, though not identical to, the 24.78% figure <code>adult.names</code> reports for the “without unknowns” subset of the full combined file (this chart uses the full 32,561-row train file, unknowns included, which is why the figures aren’t expected to match exactly). Read against real 1994 figures rather than the dataset’s own documentation: the Census Bureau’s published <em>household</em> top-quintile (80th-percentile) income threshold for 1994 was $62,841 (Historical Income Tables, compiled by the Tax Policy Center from Census H-01/H-03) — meaning a $50K threshold sat comfortably <em>below</em> the top 20% of households, not at some extreme tail. But this dataset’s <code>income</code> label is at the <em>individual</em> level, a genuinely different unit than household income, and the closer individual-level benchmark makes $50K look far more selective: median 1994 earnings for full-time, year-round workers were $31,609 for men and $23,261 for women (Census CPS, via NCES <em>Youth Indicators 1996</em>) — so an individual clearing $50K was earning well above the median for <em>either</em> sex, not merely an upper-middle household. That distinction — household vs.&nbsp;individual income — is exactly the kind of units mismatch worth naming rather than gliding past. <!-- insight:income-prevalence:end --></p>
+<!-- insight:capgain-topcode:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/chart_capgain_topcode.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/distributions-capgain-r-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Only 8.4% of respondents report any nonzero capital gain at all, so the chart above deliberately isolates that nonzero population rather than plotting the full column (which would be one enormous bar at zero and nothing else — a distribution shape check that matters more than it might seem, since the zero-inflated shape would otherwise get mischaracterized as ordinary right skew). Within that nonzero population, there’s a working distribution of gains from a few hundred to about $25,000 — and then a distinct spike of 159 people sitting at exactly $99,999. That’s not 159 people who happened to report the same six-figure gain; it’s the documented behavior of Census-era top-coding, where public-use files cap high values at a fixed ceiling to protect respondent privacy — confirmed directly, not just inferred from the shape of the spike: IPUMS CPS’s published topcode tables record that 1988–1995 CPS/March ASEC files capped self-employment/farm income at <strong>exactly $99,999</strong>, the identical figure this dataset’s <code>capital_gain</code> column tops out at. Checking directly: <strong>100% of the 159 top-coded respondents earn <code>&gt;50K</code></strong>, and their average age (46.4) runs well above the sample average (38.5). The practical implication is a real one for anyone modeling this data: the <code>income</code> label and the <code>capital_gain</code> column both understate how <em>far</em> above $50K — or above whatever the true capital gain was — this specific subgroup actually sits. Any downstream use that treats $99,999 as a real value (rather than a censored one) will misestimate this group specifically. <!-- insight:capgain-topcode:end --></p>
+</section>
+<section id="trends" class="level2">
+<h2 class="anchored" data-anchor-id="trends">Trends</h2>
+<!-- insight:education-threshold:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/chart_education_trend.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/trends-education-r-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Education’s payoff isn’t a smooth, gradual climb — it’s closer to a step. The share earning <code>&gt;50K</code> stays under 20% all the way through <code>Some-college</code>, crosses into the 25–26% range for the two Associate’s-degree tiers, and then <strong>jumps to a majority specifically at the Master’s tier (55.7%)</strong> — the first point on the curve where earning over $50K stops being the minority outcome. <code>Bachelors</code> alone (41.5%) is not enough to cross that line on its own, which is worth naming plainly since “a college degree” is often treated as a single threshold in casual discussion of this era’s economy — the data says the majority-crossing point sits one credential tier higher than that. <!-- insight:education-threshold:end --></p>
+<!-- insight:hours-tradeoff:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/chart_hours_band.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/trends-hours-r-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>More hours worked tracks a higher <code>&gt;50K</code> rate — up to a point. The relationship rises cleanly from part-time (6.9%) through the 41–79 hour band (40.4%), which is intuitive: more hours generally means more income, and salaried professional/managerial roles cluster in that band. But it <strong>turns over at 80+ hours/week</strong>, dropping to 35.2% — the extreme-hours group earns <em>less</em> often than the 41–79 hour group, not more. That’s inconsistent with a simple “grinding harder pays off” story, and more consistent with at least part of that 341-person group holding down multiple lower-wage jobs rather than one intensely compensated one. Note also, separately, that <code>hours_per_week</code> heaps hard at exactly 40 (46.7% of the entire sample) — the culturally standard reporting number — which is a self-report rounding artifact worth keeping in mind rather than a claim that nearly half the workforce works precisely 40.00 hours. <!-- insight:hours-tradeoff:end --></p>
+</section>
+<section id="anomalies-and-domain-specific-findings" class="level2">
+<h2 class="anchored" data-anchor-id="anomalies-and-domain-specific-findings">Anomalies and Domain-Specific Findings</h2>
+<!-- insight:sex-occupation-gap:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/chart_occ_gap.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="report_files/figure-html/anomalies-occ-gap-r-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The raw, sample-wide gap — 30.6% of men vs.&nbsp;11.0% of women earning <code>&gt;50K</code>, a 19.6 percentage-point difference — could be explained two very different ways: either men and women are concentrated in different occupations that happen to pay differently (a segregation story), or men out-earn women <em>within the same occupation</em> (a within-occupation pay-rate story). Checking directly settles which one dominates: <strong>every single occupation in the data, without exception, shows a positive male-minus-female gap</strong> (the one near-zero/negative case, <code>Priv-house-serv</code>, is a small, 94.6%-female occupation with almost no male comparison group). The average within-occupation gap is 16.4 percentage points — nearly as large as the 19.6-point raw gap — and the largest gaps appear in the higher-paying professional/managerial occupations (<code>Exec-managerial</code> at 34pp, <code>Prof-specialty</code> at 31pp), not the lower-paying ones. Occupational segregation by sex is real in this data too — women are 5.4% of <code>Craft-repair</code> but 94.6% of <code>Priv-house-serv</code> — but it is not the primary driver of the aggregate gap the way a “different jobs, different pay” story alone would suggest.</p>
+<p>This lines up directionally with the real 1994 labor market, though the comparison needs a units caveat named explicitly rather than glossed over: BLS/Census CPS earnings series for the era put the national women’s-to-men’s <em>earnings ratio</em> at roughly 72–77 cents on the dollar through the early-to-mid 1990s — a <em>continuous dollar ratio</em>. This dataset only provides a <em>binary</em> <code>&gt;50K</code>/<code>&lt;=50K</code> label, not actual dollar earnings, so the 19.6-point gap above is a gap in the rate of crossing one threshold, not a directly comparable ratio — the two figures can’t be equated, only checked for whether they point the same direction, and they do. A model that hits high accuracy predicting <code>income</code> from these features would learn the within-occupation pattern above without ever surfacing it as a distinct, nameable social fact — which is exactly the kind of thing a pure accuracy metric lets a reader ignore.</p>
+<p>One small aside worth naming rather than silently smoothing over: cross-tabulating <code>sex</code> against <code>relationship</code> to sanity-check that <code>Husband</code>/<code>Wife</code> behave as clean sex proxies turned up 3 rows (out of 32,561) that don’t fit — 2 coded <code>sex = Male</code> with <code>relationship = Wife</code>, and 1 coded <code>sex = Female</code> with <code>relationship = Husband</code>. Three rows are far too few to generalize from or build any finding on, but they’re a real, direct instance of people this dataset’s binary husband/wife household-role framing doesn’t have a clean box for — worth a plain mention rather than quietly treating <code>relationship</code> as a perfect proxy for sex throughout this section. <!-- insight:sex-occupation-gap:end --></p>
+<!-- insight:not-in-labor-force:start -->
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/processed/missing_workclass_summary.rds"</span>) <span class="sc">%&gt;%</span> knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">workclass_missing</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">pct_over50k</th>
+<th style="text-align: right;">mean_age</th>
+<th style="text-align: right;">mean_hours</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">30725</td>
+<td style="text-align: right;">24.9</td>
+<td style="text-align: right;">38.4</td>
+<td style="text-align: right;">40.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: right;">1836</td>
+<td style="text-align: right;">10.4</td>
+<td style="text-align: right;">41.0</td>
+<td style="text-align: right;">31.9</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The 1,836 people missing both <code>workclass</code> and <code>occupation</code> (see Data Quality Checks) aren’t a random 5.6% slice of the sample — they earn <code>&gt;50K</code> at less than half the rate of everyone else (10.4% vs.&nbsp;24.9%), report noticeably fewer average hours worked (31.9 vs.&nbsp;40.9), and skew toward an older age profile (75th-percentile age 61, vs.&nbsp;47 for the rest of the sample). One caveat worth naming before over-interpreting this as “retirees”: <code>adult.names</code> states this whole extract was built with an <code>hours-per-week &gt; 0</code> filter, so anyone reporting zero hours — a fully retired person, for instance — would already have been excluded from the dataset entirely, and this group’s own average of 31.9 hours confirms they’re not zero-hour. What’s left, then, is a genuinely narrower claim than “not in the labor force”: a group that is still working, on average fewer hours, skewing older, earning <code>&gt;50K</code> far less often, and specifically missing a formal employment classification — consistent with irregular, informal, or reduced-scale work arrangements (partial retirement, for instance) rather than a clean “not working” story. That’s a real modeling decision this report deliberately stops short of resolving (per this template’s scope), but it’s worth naming explicitly: dropping these 1,836 rows and encoding them as their own category are two different modeling choices with different implications, and treating the missingness as noise to be imputed away would erase a real, identifiable population rather than a data-quality nuisance. <!-- insight:not-in-labor-force:end --></p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>This dataset describes a real, if dated, cross-section of the working-age U.S. population in 1994, and four things about it are worth taking away beyond the individual chart-level findings above. First, education’s payoff in this data is not gradual — it’s a step that lands specifically at the Master’s degree tier, one credential level above where casual discussion of “the college wage premium” often draws the line. Second, the large sex gap in <code>&gt;50K</code> rates is not primarily a story about men and women doing different jobs; it shows up strongly <em>within</em> nearly every occupation this data has, which is a meaningfully different — and more uncomfortable — claim than an occupational-segregation story alone would be. Third, the data’s own quality artifacts are not just cleanup items: the capital-gains top-code at $99,999 isn’t noise, it’s a censored signal that 159 real people’s incomes are being systematically understated by the label this dataset trains on. And fourth, roughly 1 in 18 people in this sample are effectively invisible to an “employment features → income” framing, because they don’t have employment features to report — most plausibly because they’re retired or otherwise outside the labor force, not because of random non-response.</p>
+<p>None of this is a claim about the U.S. economy in 2026. The data is 32 years old at the time of this report, and <code>$50,000</code> was a substantially higher bar for “high income” in 1994 than the same number is today: CPI-based conversion puts 1994’s $50,000 at roughly <strong>$111,000–$113,000 in 2026 dollars</strong> — nearly two and a quarter times its face value — so every “earns <code>&gt;50K</code>” figure in this report should be read as describing something closer to a six-figure-today earner, not a $50K-today one. The sample also runs slightly more educated than the general 1994 adult population: 86.9% of this sample holds a high-school credential or higher and 24.8% holds a bachelor’s degree or higher, against the Census Bureau’s published national figures of 81.7% and 23.0% respectively for adults 25+ in March 1995 — expected, since this extract is restricted to people with positive reported work hours, which skews younger and more attached to the labor force than the full adult population (which includes retirees and others outside it). Every subgroup pattern described here reflects 1994 labor-market structure, not current conditions. The unweighted-sample caveat matters too: every proportion in this report describes the 32,561 people in this specific extract, not a population estimate reweighted by the Census Bureau’s own <code>fnlwgt</code> controls — a reader who needs a population-level estimate rather than a sample-level description should not read these percentages as interchangeable with one.</p>
+<section id="analysis-approach-next-phase" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-approach-next-phase">Analysis Approach (Next Phase)</h2>
+<p>If this analysis continues into modeling, the natural next step is a classifier predicting <code>income</code> from the demographic and employment features, with two decisions flagged directly by this EDA rather than left implicit: how to encode the ~1,836 not-in-labor-force rows (drop vs.&nbsp;explicit category, per the finding above), and whether <code>sex</code>/<code>race</code>/<code>relationship</code> should be used as raw predictive features at all given the fairness question the occupation-gap finding raises — using them directly risks a model that encodes the within-occupation pay gap rather than explaining it. That modeling work, and its own results reporting, is out of scope for this document.</p>
+</section>
+</section>
+<section id="technical-notes" class="level1">
+<h1>Technical Notes</h1>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<ul>
+<li><strong>Environment:</strong> R 4.6.1, package versions pinned in <code>src/renv.lock</code> (analysis) and <code>reports/renv.lock</code> (report rendering) — see each folder’s own lockfile, generated via <code>renv</code>.</li>
+<li><strong>To reproduce:</strong> from <code>src/</code>, run <code>renv::restore()</code> once, then execute <code>R/01_data_quality.R</code>, <code>R/02_general_eda.R</code>, <code>R/03_targeted_followups.R</code>, and <code>R/04_charts.R</code> in that order — each writes its outputs directly into <code>reports/data/processed/</code>. Then, from <code>reports/</code>, run <code>renv::restore()</code> and render <code>report.qmd</code> (<code>quarto render report.qmd</code>). <code>src/exploration/log.md</code> narrates the actual analytical journey behind these scripts, including the dead ends; <code>src/R/candidate_questions.md</code> has the full Phase 3 candidate question pool, not just the ones selected for this report.</li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<!-- insight:phase0-grounding:start -->
+<p>External sources used to ground this report against the real world, independent of the dataset’s own documentation (per the Circular Grounding Trap discipline — none of these are analyses of this dataset):</p>
+<ol type="1">
+<li><p>U.S. Census Bureau, <em>Current Population Reports P60-189, “Income, Poverty, and Valuation of Noncash Benefits: 1994”</em> — 1994 household median income ($32,264) and the basis for the household-vs-individual unit distinction used in the Distributions section. https://www.census.gov/library/publications/1996/demo/p60-189.html</p></li>
+<li><p>U.S. Census Bureau Historical Income Tables (H-01/H-03), compiled by the Tax Policy Center — 1994 household top-quintile (80th percentile) income threshold, $62,841. https://taxpolicycenter.org/statistics/household-income-quintiles</p></li>
+<li><p>National Center for Education Statistics, <em>Youth Indicators 1996</em> (sourcing Census Bureau CPS) — 1994 median earnings for full-time, year-round workers by sex ($31,609 men / $23,261 women), used as the individual-level income benchmark. https://nces.ed.gov/pubs98/yi/y9620a.asp</p></li>
+<li><p>in2013dollars.com CPI-based inflation calculator — 1994-to-2026 dollar conversion for the $50,000 income threshold. https://www.in2013dollars.com/us/inflation/1994?amount=50000</p></li>
+<li><p>U.S. Census Bureau CPS / Statistical Brief SB/95-25 (March 1995) — national educational-attainment figures for adults 25+, used as the education-distribution benchmark. https://www2.census.gov/library/publications/1995/demographics/sb95-25.pdf</p></li>
+<li><p>Bureau of Labor Statistics / Census Bureau CPS earnings series, as summarized by Econlib’s <em>Encyclopedia of Economics</em> — the ~72–77% women’s-to-men’s earnings ratio used (with an explicit units caveat) alongside the sex/occupation income-gap finding. https://www.econlib.org/library/Enc/GenderGap.html</p></li>
+<li><p>IPUMS CPS topcode tables (University of Minnesota) — documented $99,999 topcode for self-employment/farm income in 1988–1995 CPS/March ASEC files, confirming the capital-gains top-coding finding. https://cps.ipums.org/cps/topcodes_tables.shtml <!-- insight:phase0-grounding:end --></p></li>
+<li><p>UCI Machine Learning Repository, “Adult Data Set” / “Census Income,” donated by Ronny Kohavi and Barry Becker (1996) — source data and documentation (<code>adult.data</code>, <code>adult.names</code>).</p></li>
+</ol>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

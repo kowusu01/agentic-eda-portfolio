@@ -1,0 +1,194 @@
+---
+title: "Adult / Census Income Dataset — Exploratory Data Analysis"
+author: "Kwaku Owusu-Tieku (EDA by Claude)"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-tokens-r
+#| include: false
+library(tidyverse)
+library(arrow)
+source("styles/style_tokens.R")
+
+df <- read_parquet("data/processed/adult_clean.parquet")
+```
+
+# Introduction
+
+This report explores the "Adult" dataset — a 32,561-row extract from the U.S. Census Bureau's 1994 Current Population Survey (CPS), donated to the UCI Machine Learning Repository by Ronny Kohavi and Barry Becker. Each row is one working-age adult, described by 14 demographic and employment attributes (age, education, occupation, marital status, hours worked, and so on), alongside a binary label: whether that person's annual income was above or below $50,000.
+
+This analysis asks four questions of the data, chosen because they're the ones a reader relying on this dataset for anything beyond a machine-learning exercise would actually need answered: **Does education pay off gradually, or is there a specific point where it becomes the majority outcome to earn over $50K? Does the large raw gap in earnings between men and women in this sample persist within the same occupation, or is it mostly explained by which occupations each sex is concentrated in? What does a data-quality artifact — capital gains capped at $99,999 — actually reveal about the people it affects? And who is quietly excluded from a "predict income" framing by the data's own structure** — the people who didn't report an occupation at all, or who work extreme hours without an obvious payoff? Each is answered with the data directly, not asserted from the chart alone.
+
+# The Data
+
+## Source
+
+Extracted from the 1994 Census Bureau CPS database by Barry Becker, using the filter conditions `age > 16 && AGI > 100 && fnlwgt > 1 && hours-per-week > 0`, and donated to the UCI Machine Learning Repository in 1996. This is the 32,561-row training partition (`adult.data`); a separate 16,281-row test partition (`adult.test`) exists but is not used here. **The data describes the United States as it was in 1994** — over three decades before this report was written — and every figure below should be read as a historical snapshot, not a claim about current income, education, or labor-market conditions.
+
+## Reading the Data
+
+```{r}
+#| label: load-data-r
+glimpse(df)
+```
+
+Column names were converted from the source's hyphenated form (`marital-status`, `capital-gain`, etc.) to underscores for R compatibility; no other renaming was done. `education_num` is a numeric encoding of `education` — confirmed 1:1 (verified directly in `src/R/01_data_quality.R`, not assumed from the column names alone) — provided so ordinal comparisons across education levels don't require re-deriving an ordering from the text labels. `fnlwgt` is a Census-computed sampling weight (raked against state, Hispanic-origin, and race/age/sex population controls), not a demographic attribute of the person it's attached to — it is excluded from substantive analysis throughout this report, and **every proportion or rate reported below is of this 32,561-row sample as collected, not reweighted to population totals.** That distinction is confirmed, not just asserted: Phase 2's group-comparison check (see Data Quality Checks) found `fnlwgt` shows no relationship to `income` — mean and spread are nearly identical across both income groups — which is exactly what should be true of an administrative weight and supports treating it as non-substantive rather than a variable worth analyzing on its own terms. `income` is the target label (`<=50K` / `>50K`).
+
+# Data Quality Checks
+
+## Record Count Verification
+
+```{r}
+#| label: record-count-r
+readRDS("data/processed/qc_record_count.rds") %>% knitr::kable()
+```
+
+Matches the source documentation (`adult.names`) exactly: 32,561 rows in the training partition.
+
+## Null / Missing Value Check
+
+`adult.names` states that unknown values were recoded to the string `"?"` in this public-use file — there are no literal empty/NA cells, but three columns carry this disguised-null marker:
+
+```{r}
+#| label: null-check-r
+readRDS("data/processed/qc_null_tbl.rds") %>% filter(n_missing > 0) %>% knitr::kable()
+```
+
+These are handled as genuine missing values (converted to `NA`) in the cleaned dataset, not dropped and not imputed — dropping rows would discard real information (see the missingness-pattern finding below), and imputing a categorical value here has no principled basis. `workclass` and `occupation` missingness turned out **not** to be independent: checking directly, all 1,836 rows missing `workclass` are also missing `occupation` (plus 7 more rows missing `occupation` alone) — a structural pattern consistent with CPS skip-logic (someone who reports no employment class has nothing to report an occupation within), not scattered non-response. `native_country` missingness, by contrast, is largely independent of that pattern: 95.4% of the 583 rows missing `native_country` still have a `workclass` reported, pointing to a separate, unrelated non-response mechanism (most plausibly the nativity question specifically) rather than a second symptom of the same skip-logic.
+
+A direct duplicate-row check also turned up 24 exact-duplicate rows in this 32,561-row file. `adult.names` reports "6 duplicate or conflicting instances," but that figure is for the full 48,842-row combined `adult.all` file — not a contradiction, just a different denominator, worth stating explicitly rather than assuming the documented "6" applies to this file alone.
+
+## Numeric Range Validation
+
+```{r}
+#| label: numeric-ranges-r
+readRDS("data/processed/qc_numeric_range.rds") %>% knitr::kable(digits = 1)
+```
+
+All ranges are domain-plausible (`age` 17–90, consistent with the extraction filter of `age > 16`; `hours_per_week` 1–99). Two values are worth naming as outliers relative to their own column, not just checked against a plausible range: `capital_gain` tops out at exactly $99,999 with 159 rows sitting precisely at that value — a strong signature of Census-era income top-coding (a privacy-motivated cap on public-use files) rather than 159 people who organically reported that exact figure. `capital_loss` tops out at $4,356 with only 3 rows at that value — not an obvious top-code pattern, treated as a genuine maximum. Both `capital_gain` and `capital_loss` are heavily zero-inflated (91.6% and 95.3% zero respectively) rather than simply right-skewed — a distinction that matters for how they get charted (see Distributions, below).
+
+## Categorical Level Inventory
+
+```{r}
+#| label: categorical-levels-r
+readRDS("data/processed/qc_categorical_inventory.rds") %>% knitr::kable()
+```
+
+No inconsistent representations (free-text vs. controlled vocabulary) — all nine categorical columns use a fixed, documented vocabulary per `adult.names`. `native_country` (42 levels) and `occupation`/`education` (14–16 levels each) are large enough that per-category detail is shown selectively below rather than exhaustively.
+
+# Data Visualization and Exploration
+
+## Questions
+
+1. At what education level does earning over $50K become the *majority* outcome, not just a more likely one — and where exactly does that threshold fall?
+2. The raw gender gap in this sample's `>50K` rate is large (30.6% of men vs. 11.0% of women). Does that gap persist *within* the same occupation, or is it substantially explained by which occupations each sex is concentrated in?
+3. What does the $99,999 capital-gains top-code reveal about the people who hit it — and what does that imply about how well `income` captures income at the top of the distribution?
+4. Does working more hours keep paying off all the way to the extreme end of the range, or does that relationship turn over? And who are the roughly 1,836 people this dataset doesn't have an occupation for at all?
+
+## Distributions
+
+<!-- insight:income-prevalence:start -->
+```{r, fig.width=fig_md$width, fig.height=fig_md$height}
+#| label: distributions-income-prevalence-r
+readRDS("data/processed/chart_income_prevalence.rds")
+```
+
+24.1% of this sample earned over $50,000 in 1994 — close to, though not identical to, the 24.78% figure `adult.names` reports for the "without unknowns" subset of the full combined file (this chart uses the full 32,561-row train file, unknowns included, which is why the figures aren't expected to match exactly). Read against real 1994 figures rather than the dataset's own documentation: the Census Bureau's published *household* top-quintile (80th-percentile) income threshold for 1994 was $62,841 (Historical Income Tables, compiled by the Tax Policy Center from Census H-01/H-03) — meaning a $50K threshold sat comfortably *below* the top 20% of households, not at some extreme tail. But this dataset's `income` label is at the *individual* level, a genuinely different unit than household income, and the closer individual-level benchmark makes $50K look far more selective: median 1994 earnings for full-time, year-round workers were $31,609 for men and $23,261 for women (Census CPS, via NCES *Youth Indicators 1996*) — so an individual clearing $50K was earning well above the median for *either* sex, not merely an upper-middle household. That distinction — household vs. individual income — is exactly the kind of units mismatch worth naming rather than gliding past.
+<!-- insight:income-prevalence:end -->
+
+<!-- insight:capgain-topcode:start -->
+```{r, fig.width=fig_md$width, fig.height=fig_md$height}
+#| label: distributions-capgain-r
+readRDS("data/processed/chart_capgain_topcode.rds")
+```
+
+Only 8.4% of respondents report any nonzero capital gain at all, so the chart above deliberately isolates that nonzero population rather than plotting the full column (which would be one enormous bar at zero and nothing else — a distribution shape check that matters more than it might seem, since the zero-inflated shape would otherwise get mischaracterized as ordinary right skew). Within that nonzero population, there's a working distribution of gains from a few hundred to about $25,000 — and then a distinct spike of 159 people sitting at exactly $99,999. That's not 159 people who happened to report the same six-figure gain; it's the documented behavior of Census-era top-coding, where public-use files cap high values at a fixed ceiling to protect respondent privacy — confirmed directly, not just inferred from the shape of the spike: IPUMS CPS's published topcode tables record that 1988–1995 CPS/March ASEC files capped self-employment/farm income at **exactly $99,999**, the identical figure this dataset's `capital_gain` column tops out at. Checking directly: **100% of the 159 top-coded respondents earn `>50K`**, and their average age (46.4) runs well above the sample average (38.5). The practical implication is a real one for anyone modeling this data: the `income` label and the `capital_gain` column both understate how *far* above $50K — or above whatever the true capital gain was — this specific subgroup actually sits. Any downstream use that treats $99,999 as a real value (rather than a censored one) will misestimate this group specifically.
+<!-- insight:capgain-topcode:end -->
+
+## Trends
+
+<!-- insight:education-threshold:start -->
+```{r, fig.width=fig_lg$width, fig.height=fig_lg$height}
+#| label: trends-education-r
+readRDS("data/processed/chart_education_trend.rds")
+```
+
+Education's payoff isn't a smooth, gradual climb — it's closer to a step. The share earning `>50K` stays under 20% all the way through `Some-college`, crosses into the 25–26% range for the two Associate's-degree tiers, and then **jumps to a majority specifically at the Master's tier (55.7%)** — the first point on the curve where earning over $50K stops being the minority outcome. `Bachelors` alone (41.5%) is not enough to cross that line on its own, which is worth naming plainly since "a college degree" is often treated as a single threshold in casual discussion of this era's economy — the data says the majority-crossing point sits one credential tier higher than that.
+<!-- insight:education-threshold:end -->
+
+<!-- insight:hours-tradeoff:start -->
+```{r, fig.width=fig_md$width, fig.height=fig_md$height}
+#| label: trends-hours-r
+readRDS("data/processed/chart_hours_band.rds")
+```
+
+More hours worked tracks a higher `>50K` rate — up to a point. The relationship rises cleanly from part-time (6.9%) through the 41–79 hour band (40.4%), which is intuitive: more hours generally means more income, and salaried professional/managerial roles cluster in that band. But it **turns over at 80+ hours/week**, dropping to 35.2% — the extreme-hours group earns *less* often than the 41–79 hour group, not more. That's inconsistent with a simple "grinding harder pays off" story, and more consistent with at least part of that 341-person group holding down multiple lower-wage jobs rather than one intensely compensated one. Note also, separately, that `hours_per_week` heaps hard at exactly 40 (46.7% of the entire sample) — the culturally standard reporting number — which is a self-report rounding artifact worth keeping in mind rather than a claim that nearly half the workforce works precisely 40.00 hours.
+<!-- insight:hours-tradeoff:end -->
+
+## Anomalies and Domain-Specific Findings
+
+<!-- insight:sex-occupation-gap:start -->
+```{r, fig.width=fig_tall(13)$width, fig.height=fig_tall(13)$height}
+#| label: anomalies-occ-gap-r
+readRDS("data/processed/chart_occ_gap.rds")
+```
+
+The raw, sample-wide gap — 30.6% of men vs. 11.0% of women earning `>50K`, a 19.6 percentage-point difference — could be explained two very different ways: either men and women are concentrated in different occupations that happen to pay differently (a segregation story), or men out-earn women *within the same occupation* (a within-occupation pay-rate story). Checking directly settles which one dominates: **every single occupation in the data, without exception, shows a positive male-minus-female gap** (the one near-zero/negative case, `Priv-house-serv`, is a small, 94.6%-female occupation with almost no male comparison group). The average within-occupation gap is 16.4 percentage points — nearly as large as the 19.6-point raw gap — and the largest gaps appear in the higher-paying professional/managerial occupations (`Exec-managerial` at 34pp, `Prof-specialty` at 31pp), not the lower-paying ones. Occupational segregation by sex is real in this data too — women are 5.4% of `Craft-repair` but 94.6% of `Priv-house-serv` — but it is not the primary driver of the aggregate gap the way a "different jobs, different pay" story alone would suggest.
+
+This lines up directionally with the real 1994 labor market, though the comparison needs a units caveat named explicitly rather than glossed over: BLS/Census CPS earnings series for the era put the national women's-to-men's *earnings ratio* at roughly 72–77 cents on the dollar through the early-to-mid 1990s — a *continuous dollar ratio*. This dataset only provides a *binary* `>50K`/`<=50K` label, not actual dollar earnings, so the 19.6-point gap above is a gap in the rate of crossing one threshold, not a directly comparable ratio — the two figures can't be equated, only checked for whether they point the same direction, and they do. A model that hits high accuracy predicting `income` from these features would learn the within-occupation pattern above without ever surfacing it as a distinct, nameable social fact — which is exactly the kind of thing a pure accuracy metric lets a reader ignore.
+
+One small aside worth naming rather than silently smoothing over: cross-tabulating `sex` against `relationship` to sanity-check that `Husband`/`Wife` behave as clean sex proxies turned up 3 rows (out of 32,561) that don't fit — 2 coded `sex = Male` with `relationship = Wife`, and 1 coded `sex = Female` with `relationship = Husband`. Three rows are far too few to generalize from or build any finding on, but they're a real, direct instance of people this dataset's binary husband/wife household-role framing doesn't have a clean box for — worth a plain mention rather than quietly treating `relationship` as a perfect proxy for sex throughout this section.
+<!-- insight:sex-occupation-gap:end -->
+
+<!-- insight:not-in-labor-force:start -->
+```{r}
+#| label: anomalies-missing-workclass-r
+readRDS("data/processed/missing_workclass_summary.rds") %>% knitr::kable(digits = 1)
+```
+
+The 1,836 people missing both `workclass` and `occupation` (see Data Quality Checks) aren't a random 5.6% slice of the sample — they earn `>50K` at less than half the rate of everyone else (10.4% vs. 24.9%), report noticeably fewer average hours worked (31.9 vs. 40.9), and skew toward an older age profile (75th-percentile age 61, vs. 47 for the rest of the sample). One caveat worth naming before over-interpreting this as "retirees": `adult.names` states this whole extract was built with an `hours-per-week > 0` filter, so anyone reporting zero hours — a fully retired person, for instance — would already have been excluded from the dataset entirely, and this group's own average of 31.9 hours confirms they're not zero-hour. What's left, then, is a genuinely narrower claim than "not in the labor force": a group that is still working, on average fewer hours, skewing older, earning `>50K` far less often, and specifically missing a formal employment classification — consistent with irregular, informal, or reduced-scale work arrangements (partial retirement, for instance) rather than a clean "not working" story. That's a real modeling decision this report deliberately stops short of resolving (per this template's scope), but it's worth naming explicitly: dropping these 1,836 rows and encoding them as their own category are two different modeling choices with different implications, and treating the missingness as noise to be imputed away would erase a real, identifiable population rather than a data-quality nuisance.
+<!-- insight:not-in-labor-force:end -->
+
+# Conclusion
+
+This dataset describes a real, if dated, cross-section of the working-age U.S. population in 1994, and four things about it are worth taking away beyond the individual chart-level findings above. First, education's payoff in this data is not gradual — it's a step that lands specifically at the Master's degree tier, one credential level above where casual discussion of "the college wage premium" often draws the line. Second, the large sex gap in `>50K` rates is not primarily a story about men and women doing different jobs; it shows up strongly *within* nearly every occupation this data has, which is a meaningfully different — and more uncomfortable — claim than an occupational-segregation story alone would be. Third, the data's own quality artifacts are not just cleanup items: the capital-gains top-code at $99,999 isn't noise, it's a censored signal that 159 real people's incomes are being systematically understated by the label this dataset trains on. And fourth, roughly 1 in 18 people in this sample are effectively invisible to an "employment features → income" framing, because they don't have employment features to report — most plausibly because they're retired or otherwise outside the labor force, not because of random non-response.
+
+None of this is a claim about the U.S. economy in 2026. The data is 32 years old at the time of this report, and `$50,000` was a substantially higher bar for "high income" in 1994 than the same number is today: CPI-based conversion puts 1994's $50,000 at roughly **$111,000–$113,000 in 2026 dollars** — nearly two and a quarter times its face value — so every "earns `>50K`" figure in this report should be read as describing something closer to a six-figure-today earner, not a $50K-today one. The sample also runs slightly more educated than the general 1994 adult population: 86.9% of this sample holds a high-school credential or higher and 24.8% holds a bachelor's degree or higher, against the Census Bureau's published national figures of 81.7% and 23.0% respectively for adults 25+ in March 1995 — expected, since this extract is restricted to people with positive reported work hours, which skews younger and more attached to the labor force than the full adult population (which includes retirees and others outside it). Every subgroup pattern described here reflects 1994 labor-market structure, not current conditions. The unweighted-sample caveat matters too: every proportion in this report describes the 32,561 people in this specific extract, not a population estimate reweighted by the Census Bureau's own `fnlwgt` controls — a reader who needs a population-level estimate rather than a sample-level description should not read these percentages as interchangeable with one.
+
+## Analysis Approach (Next Phase)
+
+If this analysis continues into modeling, the natural next step is a classifier predicting `income` from the demographic and employment features, with two decisions flagged directly by this EDA rather than left implicit: how to encode the ~1,836 not-in-labor-force rows (drop vs. explicit category, per the finding above), and whether `sex`/`race`/`relationship` should be used as raw predictive features at all given the fairness question the occupation-gap finding raises — using them directly risks a model that encodes the within-occupation pay gap rather than explaining it. That modeling work, and its own results reporting, is out of scope for this document.
+
+# Technical Notes
+
+## Reproducibility
+
+- **Environment:** R `r getRversion()`, package versions pinned in `src/renv.lock` (analysis) and `reports/renv.lock` (report rendering) — see each folder's own lockfile, generated via `renv`.
+- **To reproduce:** from `src/`, run `renv::restore()` once, then execute `R/01_data_quality.R`, `R/02_general_eda.R`, `R/03_targeted_followups.R`, and `R/04_charts.R` in that order — each writes its outputs directly into `reports/data/processed/`. Then, from `reports/`, run `renv::restore()` and render `report.qmd` (`quarto render report.qmd`). `src/exploration/log.md` narrates the actual analytical journey behind these scripts, including the dead ends; `src/R/candidate_questions.md` has the full Phase 3 candidate question pool, not just the ones selected for this report.
+
+## References
+
+<!-- insight:phase0-grounding:start -->
+External sources used to ground this report against the real world, independent of the dataset's own documentation (per the Circular Grounding Trap discipline — none of these are analyses of this dataset):
+
+1. U.S. Census Bureau, *Current Population Reports P60-189, "Income, Poverty, and Valuation of Noncash Benefits: 1994"* — 1994 household median income ($32,264) and the basis for the household-vs-individual unit distinction used in the Distributions section. https://www.census.gov/library/publications/1996/demo/p60-189.html
+2. U.S. Census Bureau Historical Income Tables (H-01/H-03), compiled by the Tax Policy Center — 1994 household top-quintile (80th percentile) income threshold, $62,841. https://taxpolicycenter.org/statistics/household-income-quintiles
+3. National Center for Education Statistics, *Youth Indicators 1996* (sourcing Census Bureau CPS) — 1994 median earnings for full-time, year-round workers by sex ($31,609 men / $23,261 women), used as the individual-level income benchmark. https://nces.ed.gov/pubs98/yi/y9620a.asp
+4. in2013dollars.com CPI-based inflation calculator — 1994-to-2026 dollar conversion for the $50,000 income threshold. https://www.in2013dollars.com/us/inflation/1994?amount=50000
+5. U.S. Census Bureau CPS / Statistical Brief SB/95-25 (March 1995) — national educational-attainment figures for adults 25+, used as the education-distribution benchmark. https://www2.census.gov/library/publications/1995/demographics/sb95-25.pdf
+6. Bureau of Labor Statistics / Census Bureau CPS earnings series, as summarized by Econlib's *Encyclopedia of Economics* — the ~72–77% women's-to-men's earnings ratio used (with an explicit units caveat) alongside the sex/occupation income-gap finding. https://www.econlib.org/library/Enc/GenderGap.html
+7. IPUMS CPS topcode tables (University of Minnesota) — documented $99,999 topcode for self-employment/farm income in 1988–1995 CPS/March ASEC files, confirming the capital-gains top-coding finding. https://cps.ipums.org/cps/topcodes_tables.shtml
+<!-- insight:phase0-grounding:end -->
+
+8. UCI Machine Learning Repository, "Adult Data Set" / "Census Income," donated by Ronny Kohavi and Barry Becker (1996) — source data and documentation (`adult.data`, `adult.names`).
